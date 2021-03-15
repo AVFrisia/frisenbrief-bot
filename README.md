@@ -6,7 +6,7 @@ Konvertiert Mailanhänge nach LaTeX
 
 ## Nutzung
 
-```
+```console
 usage: FrisenbriefBot.py [-h] [--host HOST] [--email EMAIL] [--passwort PASSWORT] [--datum TT-MMM-JJJJ] [--version]
 
 E-Mail Anhänge in LaTeX konvertieren
