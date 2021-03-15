@@ -1,4 +1,7 @@
 # Frisenbrief-Bot
+
+[![Lint Code Base](https://github.com/AV-Frisia/frisenbrief-bot/actions/workflows/linter.yml/badge.svg)](https://github.com/AV-Frisia/frisenbrief-bot/actions/workflows/linter.yml)
+
 Konvertiert Mailanhänge nach LaTeX
 
 ## Nutzung
