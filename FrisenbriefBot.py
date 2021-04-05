@@ -69,29 +69,6 @@ def get_attachments(emails, download_dir='/tmp/frisenbriefbot'):
                 fp.write(part.get_payload(decode=True))
                 fp.close()
                 #print('Downloaded file:', filename)
-
-def get_attachment():
-    for part in email.walk():
-            if part.get_content_maintype() == 'multipart':
-                continue
-            if part.get('Content-Disposition') is None:
-                continue
-            
-            filename = part.get_filename()
-            
-            if decode_header(filename)[0][1] is not None:
-                filename = decode_header(filename)[0][0].decode(decode_header(filename)[0][1])
-            
-            att_path = os.path.join(download_dir, filename)
-            
-            if not os.path.exists(download_dir):
-                os.makedirs(download_dir)
-
-            if not os.path.isfile(att_path):
-                fp = open(att_path, 'wb')
-                fp.write(part.get_payload(decode=True))
-                fp.close()
-                print('Downloaded file:', filename)
                 
 def convert(from_dir, to_dir):
     types = ('*.doc', '*.docx', '*.odt', '*.pdf')
