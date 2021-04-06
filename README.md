@@ -21,17 +21,18 @@ optional arguments:
 
 ```
 
-Nach der Installation aller Abhängigkeiten kann das Programm ausgeführt werden.
+Nach der Installation aller Abhängigkeiten in `requirements.txt` kann das Programm ausgeführt werden.
 
 Wenn keine Argumente gegeben sind, wird Interaktiv angefragt.
 
-## To-Do
+## Ausgabe
 
-Allgemeine Umstrukturierung
+LaTeX Dateien werden im `output` Ordner nach Absender und Betreff sortiert. Für jede Mail (falls Lesen erfolgreich) der Ordner `original` erstellt, mit allen Originalanhängen.
 
-- [ ] `requirements.txt` generieren
-- [ ] Rechtschreibprüfung
-- [ ] Spaghetticode eliminieren
-  - [ ] `tempfile` Modul benutzen anstelle von festkodiertem `/tmp/`
-  - [ ] Windows Kompatabilität
-- [ ] E-Mail Metadaten als Kommentar einbringen (Sender, Betreff, etc.)
+## Performance
+
+* Disk I/O: der großteil der Daten befinden sich im Hauptspeicher vor und während der Konvertierung. Auf *nix ist es vorteilhaft, `/tmp` als tmpfs gemountet zu haben
+* Parallelität:
+  * Jede E-Mail wird in seperatem Prozess behandelt
+  * Skaliert mit Anzahl Kernen
+* Bilder werden übersprungen und direkt in der `original`-Ordner gespeichert
