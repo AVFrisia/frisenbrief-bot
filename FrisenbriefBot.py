@@ -13,6 +13,7 @@ import datetime
 from imbox import Imbox
 import tempfile
 from multiprocessing import Pool
+from datetime import datetime
 
 logging.basicConfig(filename="bot.log", level=logging.DEBUG)
 
@@ -41,7 +42,7 @@ def fetch_messages(host, email_addr, password, since):
         starttls=False,
     ) as imbox:
         messages = imbox.messages(
-            sent_to="frisenbrief@avfrisia.de", date__gt=datetime.date(2020, 1, 1)
+            sent_to="frisenbrief@avfrisia.de", date__gt=since
         )
 
         # The virgin iterating over individual emails
@@ -169,7 +170,9 @@ if __name__ == "__main__":
         args.email = input("E-Mail: ")
     if args.passwort is None:
         args.passwort = getpass()
-    # if args.datum is None:
-    #    args.datum = input("Ab Datum (TT-MMM-JJJ): ")
+    if args.datum is None:
+        args.datum = input("Ab Datum (TT-MMM-JJJJ): ")
 
-    fetch_messages(args.host, args.email, args.passwort, args.datum)
+    date = datetime.strptime("01-01-20", "%d-%m-%y").date()
+
+    fetch_messages(args.host, args.email, args.passwort, date)
