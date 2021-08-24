@@ -173,6 +173,6 @@ if __name__ == "__main__":
     if args.datum is None:
         args.datum = input("Ab Datum (TT-MMM-JJJJ): ")
 
-    date = datetime.strptime("01-01-20", "%d-%m-%y").date()
+    date = datetime.strptime(args.datum, "%d-%m-%y").date()
 
     fetch_messages(args.host, args.email, args.passwort, date)
