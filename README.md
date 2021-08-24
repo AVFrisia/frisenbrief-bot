@@ -36,3 +36,7 @@ LaTeX Dateien werden im `output` Ordner nach Absender und Betreff sortiert. Für
   * Jede E-Mail wird in seperatem Prozess behandelt
   * Skaliert mit Anzahl Kernen
 * Bilder werden übersprungen und direkt in der `original`-Ordner gespeichert
+
+## Installation
+
+Der Bot hat Abhängigkeiten für `antiword`, `textract`, und `pandoc`. Alle weiteren Python-Abhängigkeiten können über Pip oder dem `.venv` installiert werden.
