@@ -1,5 +1,6 @@
-pylatexenc==2.8
-pathvalidate==2.3.2
-pypandoc==1.5
-textract==1.6.3
-IMAPClient==2.1.0
+pylatexenc
+pathvalidate
+pypandoc
+textract
+IMAPClient
+imbox
