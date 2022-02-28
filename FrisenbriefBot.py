@@ -15,7 +15,8 @@ import tempfile
 from multiprocessing import Pool
 from datetime import datetime
 
-logging.basicConfig(filename="bot.log", level=logging.DEBUG)
+LOGLEVEL = os.environ.get('LOGLEVEL', 'WARNING').upper()
+logging.basicConfig(level=LOGLEVEL)
 
 IMG_EXTENSIONS = [
     "jpeg",
@@ -29,7 +30,6 @@ IMG_EXTENSIONS = [
     "cr2",
     "heic",
 ]
-
 
 def fetch_messages(host, email_addr, password, since):
     """ Filter Email messages and process them concurrently """
@@ -45,17 +45,23 @@ def fetch_messages(host, email_addr, password, since):
             sent_to="frisenbrief@avfrisia.de", date__gt=since
         )
 
+        print(f"Got {len(messages)} messages")
+
         # The virgin iterating over individual emails
         # The chad taking advantage of all cores
         with Pool() as pool:
-            pool.starmap(process_email, messages)
+            finished = pool.starmap(process_email, messages)
 
+        for file in finished:
+            if file is not None:
+                print(file)
 
 def process_email(uid, message):
     """ Save attachments from an email to disk """
     
     # First, grab metadata
     if not hasattr(message, "subject"):
+        logging.warning(f"Message with UID {uid} has no subject")
         message.subject = "[No Subject]"
 
     if message.sent_from[0]["name"]:
@@ -85,8 +91,7 @@ def process_email(uid, message):
             original_file.write(attachment.get("content").getbuffer())
             original_file.close()
         except Exception as e:
-            print("ERROR: could not save original attachment: " + filename)
-            print(e)
+            logging.exception(f"Could not save original attachment {filename}")
 
         # Infer file format from extension
         names = os.path.splitext(os.path.basename(filename))
@@ -99,8 +104,7 @@ def process_email(uid, message):
         try:
             converted = convert(file_format, attachment.get("content").read())
         except Exception as e:
-            print("ERROR: could not convert attachment")
-            print(e)
+            logging.exception("Could not convert attachment")
 
         # If the file is successfully converted, write it to disk
         if converted:
@@ -117,6 +121,7 @@ def process_email(uid, message):
             output_file.write(converted)
             output_file.close()
 
+            return output_path
 
 def convert(file_format, file_content):
     """ Convert a string to a LaTeX string """
