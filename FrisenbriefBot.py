@@ -163,7 +163,7 @@ if __name__ == "__main__":
         "--datum",
         help="Datum, ab dem E-Mails gesucht werden. (Normalerweise Semesterbeginn)",
         type=str,
-        metavar="TT-MMM-JJJJ",
+        metavar="TT-MM-JJJJ",
     )
     parser.add_argument("--version", action="version", version="%(prog)s 1.0")
     args = parser.parse_args()
@@ -176,8 +176,8 @@ if __name__ == "__main__":
     if args.passwort is None:
         args.passwort = getpass()
     if args.datum is None:
-        args.datum = input("Ab Datum (TT-MMM-JJJJ): ")
+        args.datum = input("Ab Datum (TT-MM-JJJJ): ")
 
-    date = datetime.strptime(args.datum, "%d-%m-%y").date()
+    date = datetime.strptime(args.datum, "%d-%m-%Y").date()
 
     fetch_messages(args.host, args.email, args.passwort, date)
