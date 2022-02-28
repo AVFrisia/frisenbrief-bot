@@ -1,6 +1,5 @@
-pylatexenc
+imbox
 pathvalidate
+pylatexenc
 pypandoc
 textract
-IMAPClient
-imbox
