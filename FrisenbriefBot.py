@@ -14,8 +14,10 @@ from imbox import Imbox
 import tempfile
 from multiprocessing import Pool
 from datetime import datetime
+import subprocess
+import chardet
 
-LOGLEVEL = os.environ.get('LOGLEVEL', 'WARNING').upper()
+LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
 
 IMG_EXTENSIONS = [
@@ -31,8 +33,9 @@ IMG_EXTENSIONS = [
     "heic",
 ]
 
+
 def fetch_messages(host, email_addr, password, since):
-    """ Filter Email messages and process them concurrently """
+    """Filter Email messages and process them concurrently"""
     with Imbox(
         host,
         username=email_addr,
@@ -41,9 +44,10 @@ def fetch_messages(host, email_addr, password, since):
         ssl_context=None,
         starttls=False,
     ) as imbox:
-        messages = imbox.messages(
-            sent_to="frisenbrief@avfrisia.de", date__gt=since
-        )
+        status, folders = imbox.folders()
+        print(f"{status}, {len(folders)} folders")
+
+        messages = imbox.messages(sent_to="frisenbrief@avfrisia.de", date__gt=since)
 
         print(f"Got {len(messages)} messages")
 
@@ -54,12 +58,12 @@ def fetch_messages(host, email_addr, password, since):
             finished = pool.map(touchup, filter(None, converted))
 
         for file in finished:
-            if file is not None:
-                print(file)
+            print(file)
+
 
 def process_email(uid, message):
-    """ Save attachments from an email to disk """
-    
+    """Save attachments from an email to disk"""
+
     # First, grab metadata
     if not hasattr(message, "subject"):
         logging.warning(f"Message with UID {uid} has no subject")
@@ -78,11 +82,11 @@ def process_email(uid, message):
     folder = os.path.join("output", sender, message.subject)
     os.makedirs(folder, exist_ok=True)
 
-    # Save, and if possible convert, each attachment 
+    # Save, and if possible convert, each attachment
     for idx, attachment in enumerate(message.attachments):
-        
+
         filename = sanitize_filename(attachment.get("filename"))
-        
+
         # First, write our original file
         try:
             original_files_folder = os.path.join(folder, "original")
@@ -116,7 +120,7 @@ def process_email(uid, message):
             metadata_string = "% Von: {author}\r\n% Betreff: {subject}\r\n".format(
                 author=sender, subject=message.subject
             )
-            
+
             # Dump our converted file
             output_file.write(metadata_string)
             output_file.write(converted)
@@ -124,8 +128,9 @@ def process_email(uid, message):
 
             return output_path
 
+
 def convert(file_format, file_content):
-    """ Convert a string to a LaTeX string """
+    """Convert a string to a LaTeX string"""
 
     # File Format is critical for conversion
     if not file_format:
@@ -139,7 +144,17 @@ def convert(file_format, file_content):
     elif file_format.lower() in IMG_EXTENSIONS:
         # We do not want to waste processing power on OCR'ing pictures
         return None
+    elif file_format.lower() in ["txt"]:
+        # Detect encoding (because fucking Notepad.exe doesn't do UTF-8 until Build 1903)
+        en = chardet.detect(file_content)["encoding"]
+        latex += unicode_to_latex(
+            file_content.decode(encoding=en),
+            unknown_char_policy="ignore",
+            unknown_char_warning=False,
+        )
     else:
+        logging.warning(f"Falling back to textract for format {file_format}")
+
         # Textract wants a "regular" file
         tmp = tempfile.NamedTemporaryFile(suffix="." + file_format)
         tmp.write(file_content)
@@ -147,7 +162,9 @@ def convert(file_format, file_content):
         # mainly PDFs or older .doc's
         text = textract.process(tmp.name)
         latex = "% Achtung: Formatierung war nicht möglich.\r\n"
-        latex += unicode_to_latex(text.decode(), unknown_char_policy="ignore", unknown_char_warning=False)
+        latex += unicode_to_latex(
+            text.decode(), unknown_char_policy="ignore", unknown_char_warning=False
+        )
 
     return latex
 
