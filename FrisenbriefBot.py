@@ -50,7 +50,8 @@ def fetch_messages(host, email_addr, password, since):
         # The virgin iterating over individual emails
         # The chad taking advantage of all cores
         with Pool() as pool:
-            finished = pool.starmap(process_email, messages)
+            converted = pool.starmap(process_email, messages)
+            finished = pool.map(touchup, filter(None, converted))
 
         for file in finished:
             if file is not None:
@@ -149,6 +150,12 @@ def convert(file_format, file_content):
         latex += unicode_to_latex(text.decode(), unknown_char_policy="ignore", unknown_char_warning=False)
 
     return latex
+
+
+def touchup(file: str):
+    """Runs final touches (such as formatting) on a LaTeX file"""
+    subprocess.run(["latexindent", file, "-s", "-m", "-o", file], check=True)
+    return file
 
 
 if __name__ == "__main__":
