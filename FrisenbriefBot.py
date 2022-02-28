@@ -47,8 +47,8 @@ def fetch_messages(host, email_addr, password, since):
 
         # The virgin iterating over individual emails
         # The chad taking advantage of all cores
-        pool = Pool(os.cpu_count())
-        pool.starmap(process_email, messages)
+        with Pool() as pool:
+            pool.starmap(process_email, messages)
 
 
 def process_email(uid, message):
