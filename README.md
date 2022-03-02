@@ -46,22 +46,24 @@ Mit Docker können alle Abhängigkeiten isoliert installiert und der Bot ausgef�
 
 ### Image Bauen
 
-Nachdem diese Repository heruntergeladen wurde steht der Dockerfile zur verfügung:
+Das Image wird nun mit jeder Änderung automatisch neu gebaut und als GitHub-Package veröffentlicht.
 
 ```console
-[johannes@kirby frisenbrief-bot]$ docker build -t frisenbriefbot .
-Sending build context to Docker daemon  112.4MB
-Step 1/8 : FROM python:3
+[johannes@kirby workflows]$ docker pull ghcr.io/av-frisia/frisenbrief-bot:main
+main: Pulling from av-frisia/frisenbrief-bot
 ...
-Successfully tagged frisenbriefbot:latest
+Status: Downloaded newer image for ghcr.io/av-frisia/frisenbrief-bot:main
+ghcr.io/av-frisia/frisenbrief-bot:main
 ```
+
+Ansonsten kann das Image auch wie gewohnt lokal mit `docker build .` gebaut werden.
 
 ### Image Ausführen
 
 Beispiel unter Linux:
 
 ```console
-[johannes@kirby frisenbrief-bot]$ docker run -it -v $(pwd)/artikel:/usr/src/app/output frisenbriefbot
+[johannes@kirby frisenbrief-bot]$ docker run -it -v $(pwd)/artikel:/usr/src/app/output ghcr.io/av-frisia/frisenbrief-bot:main
 IMAP Server: mail.stud.uni-hannover.de
 E-Mail: johannes.arnold@stud.uni-hannover.de
 Password: 
