@@ -16,9 +16,13 @@ from multiprocessing import Pool
 from datetime import datetime
 import subprocess
 import chardet
+import signal
+import sys
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
+
+OUTPUT_DIR = "output"
 
 IMG_EXTENSIONS = [
     "jpeg",
@@ -79,7 +83,7 @@ def process_email(uid, message):
     sender = sanitize_filename(sender)
 
     # Create folder to dump files in
-    folder = os.path.join("output", sender, message.subject)
+    folder = os.path.join(OUTPUT_DIR, sender, message.subject)
     os.makedirs(folder, exist_ok=True)
 
     # Save, and if possible convert, each attachment
@@ -175,7 +179,18 @@ def touchup(file: str):
     return file
 
 
-if __name__ == "__main__":
+def cancelhandler(signum, frame):
+    logging.critical(f"Files in {OUTPUT_DIR} may be incomplete")
+    sys.exit()
+
+
+def main():
+    # Ensure we write to our own empty directory
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    if os.listdir(OUTPUT_DIR):
+        sys.exit("Fehler: Ausgabeordner nicht leer")
+    signal.signal(signal.SIGINT, cancelhandler)
+
     # set up command line arguments
     parser = argparse.ArgumentParser(description="E-Mail Anhänge in LaTeX konvertieren")
     parser.add_argument(
@@ -205,3 +220,7 @@ if __name__ == "__main__":
     date = datetime.strptime(args.datum, "%d-%m-%Y").date()
 
     fetch_messages(args.host, args.email, args.passwort, date)
+
+
+if __name__ == "__main__":
+    main()
