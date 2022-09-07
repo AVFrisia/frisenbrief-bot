@@ -24,19 +24,6 @@ logging.basicConfig(level=LOGLEVEL)
 
 OUTPUT_DIR = "output"
 
-IMG_EXTENSIONS = [
-    "jpeg",
-    "jpg",
-    "gif",
-    "png",
-    "tiff",
-    "raw",
-    "eps",
-    "bmp",
-    "cr2",
-    "heic",
-]
-
 
 def fetch_messages(host, email_addr, password, since):
     """Filter Email messages and process them concurrently"""
@@ -145,9 +132,6 @@ def convert(file_format, file_content):
     # use pypandoc for all supported types
     if file_format in pypandoc.get_pandoc_formats()[0]:
         latex += pypandoc.convert_text(file_content, format=file_format, to="latex")
-    elif file_format.lower() in IMG_EXTENSIONS:
-        # We do not want to waste processing power on OCR'ing pictures
-        return None
     elif file_format.lower() in ["txt"]:
         # Detect encoding (because fucking Notepad.exe doesn't do UTF-8 until Build 1903)
         en = chardet.detect(file_content)["encoding"]
