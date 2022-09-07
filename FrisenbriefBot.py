@@ -46,7 +46,11 @@ def fetch_messages(host, email_addr, password, since):
         # The chad taking advantage of all cores
         with Pool() as pool:
             converted = pool.starmap(process_email, messages)
-            finished = pool.map(touchup, filter(None, converted))
+
+            # Flatten all files by one level
+            paths = [path for sublist in converted for path in sublist]
+
+            finished = pool.map(touchup, filter(None, paths))
 
         for file in finished:
             print(file)
@@ -54,6 +58,9 @@ def fetch_messages(host, email_addr, password, since):
 
 def process_email(uid, message):
     """Save attachments from an email to disk"""
+
+    # Return an array of finished tex files
+    processed_files = []
 
     # First, grab metadata
     if not hasattr(message, "subject"):
@@ -117,7 +124,9 @@ def process_email(uid, message):
             output_file.write(converted)
             output_file.close()
 
-            return output_path
+            processed_files.append(output_path)
+
+    return processed_files
 
 
 def convert(file_format, file_content):
