@@ -157,7 +157,7 @@ def convert(file_format, file_content):
         tmp.write(file_content)
 
         # mainly PDFs or older .doc's
-        text = textract.process(tmp.name)
+        text = textract.process(tmp.name, language='deu')
         latex = "% Achtung: Formatierung war nicht möglich.\r\n"
         latex += unicode_to_latex(
             text.decode(), unknown_char_policy="ignore", unknown_char_warning=False
